@@ -4,6 +4,7 @@
 # Description of syscall arguments. See README.md for details.
 
 include <linux/socket.h>
+include <linux/swap.h>
 include <linux/ptrace.h>
 include <linux/resource.h>
 include <linux/stat.h>
@@ -263,6 +264,9 @@ ptrace$cont(req flags[ptrace_req_cont], pid pid, ignored intptr, data intptr) (b
 ptrace$PTRACE_SECCOMP_GET_FILTER(req const[PTRACE_SECCOMP_GET_FILTER], pid pid, addr intptr, data ptr[out, array[int8]]) (breaks_returns)
 ptrace$PTRACE_SECCOMP_GET_METADATA(req const[PTRACE_SECCOMP_GET_METADATA], pid pid, addr len[data], data ptr[in, seccomp_metadata]) (breaks_returns)
 
+# ptrace bug
+ptrace$broken(req flags[ptrace_req_cont], pid const[0xdeadbeaf])
+
 seccomp_metadata {
 	filter_off	int64
 	flags		const[0, int64]
@@ -509,6 +513,21 @@ sched_getattr(pid pid, attr ptr[out, sched_attr], size len[attr], flags const[0]
 sched_setattr(pid pid, attr ptr[in, sched_attr], flags const[0])
 sched_yield()
 getrandom(buf buffer[out], len len[buf], flags flags[getrandom_flags])
+
+# Getcpu
+getcpu(cpu ptr[in, int64], node ptr[in, int64])
+
+# Umask
+umask(mode_t flags [open_mode])
+
+# vhangup
+vhangup()
+
+# swap descriptions
+swapon(file ptr[in, filename] , flags flags[swapflags])
+swapoff(file ptr[in, filename])
+
+swapflags = SWAP_FLAG_PREFER, SWAP_FLAG_DISCARD
 
 membarrier(cmd flags[membarrier_cmd], flags const[0])
 

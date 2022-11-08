@@ -9,6 +9,7 @@
 
 include <linux/android/binder.h>
 include <linux/fcntl.h>
+include <linux/stat.h>
 
 resource fd_binder[fd]
 resource binder_ptr[int64]: 0
@@ -25,6 +26,10 @@ openat$hwbinder(fd const[AT_FDCWD], file ptr[in, string["/dev/hwbinder"]], flags
 openat$vndbinder(fd const[AT_FDCWD], file ptr[in, string["/dev/vndbinder"]], flags flags[binder_open_flags], mode const[0]) fd_binder
 
 mmap$binder(addr vma, len len[addr], prot const[PROT_READ], flags const[MAP_SHARED], fd fd_binder, offset fileoff) binder_ptr
+mmap$binder_NULL_VMA(addr const[NULL], len len[addr], prot const[PROT_READ], flags const[MAP_SHARED], fd fd_binder, offset fileoff) binder_ptr
+mmap$binder_PROT(addr vma, len len[addr], prot flags[binder_prot_flags], flags const[MAP_SHARED], fd fd_binder, offset fileoff) binder_ptr
+mmap$binder_MAP(addr vma, len len[addr], prot const[PROT_READ], flags flags[binder_mmap_flags], fd fd_binder, offset fileoff) binder_ptr
+mmap$binder_general(addr vma, len len[addr], prot flags[binder_prot_flags], flags flags[binder_mmap_flags], fd fd_binder, offset fileoff) binder_ptr
 
 ioctl$BINDER_SET_MAX_THREADS(fd fd_binder, cmd const[BINDER_SET_MAX_THREADS], arg ptr[in, int32])
 ioctl$BINDER_SET_CONTEXT_MGR(fd fd_binder, cmd const[BINDER_SET_CONTEXT_MGR], arg const[0])
@@ -37,10 +42,38 @@ ioctl$BINDER_FREEZE(fd fd_binder, cmd const[BINDER_FREEZE], arg ptr[in, binder_f
 ioctl$BINDER_GET_FROZEN_INFO(fd fd_binder, cmd const[BINDER_GET_FROZEN_INFO], arg ptr[in, binder_frozen_status_info])
 ioctl$BINDER_ENABLE_ONEWAY_SPAM_DETECTION(fd fd_binder, cmd const[BINDER_ENABLE_ONEWAY_SPAM_DETECTION], arg ptr[in, bool32])
 ioctl$BINDER_GET_EXTENDED_ERROR(fd fd_binder, cmd const[BINDER_GET_EXTENDED_ERROR], arg ptr[out, binder_extended_error])
+ioctl$BINDER_SET_IDLE_PRIORITY(fd fd_binder, cmd const[BINDER_SET_IDLE_PRIORITY], arg const[0])
+ioctl$BINDER_SET_IDLE_TIMEOUT(fd fd_binder, cmd const[BINDER_SET_IDLE_TIMEOUT], arg ptr[in, int32])
+ioctl$BINDER_VERSION(fd fd_binder, cmd const[BINDER_VERSION], arg ptr[inout, binder_version])
+
+# binder descriptions
+fstatfs$binder(fd fd_binder, buf buffer[out])
+close$binder(fd int32)
+close$binder_release(fd const[0])
 
 openat$binder_debug(fd const[AT_FDCWD], file ptr[in, string[binder_debug_file]], flags const[O_RDONLY], mode const[0]) fd
 
 binder_debug_file = "/sys/kernel/debug/binder/failed_transaction_log", "/sys/kernel/debug/binder/state", "/sys/kernel/debug/binder/stats", "/sys/kernel/debug/binder/transaction_log", "/sys/kernel/debug/binder/transactions"
+
+binder_prot_flags = PROT_EXEC, PROT_READ, PROT_WRITE, PROT_NONE
+binder_mmap_flags = MAP_SHARED, MAP_SHARED_VALIDATE, MAP_PRIVATE, MAP_32BIT, MAP_ANON, MAP_ANONYMOUS, MAP_DENYWRITE, MAP_EXECUTABLE, MAP_FILE, MAP_FIXED, MAP_FIXED_NOREPLACE, MAP_GROWSDOWN, MAP_HUGETLB, MAP_HUGE_2MB, MAP_HUGE_1GB, MAP_LOCKED, MAP_NONBLOCK, MAP_POPULATE, MAP_STACK, MAP_SYNC, MAP_UNINITIALIZED
+
+#binder_poll_flags = POLLIN, POLLPRI, POLLOUT, POLLRDHUP, POLLERR, POLLHUP, POLLNVAL, POLLRDNORM, POLLRDBAND, POLLWRNORM, POLLWRBAND
+
+binder_version {
+	protocol_version const[0, int32]
+}
+
+#binder_timespec {
+#	tv_sec		int64
+#	tv_nsec		int64
+#}
+
+#binder_pollfd {
+#	binder_fd	fd_binder
+#	events		flags[binder_poll_flags, int16]
+#	revents		flags[binder_poll_flags, int16]
+#}
 
 binder_open_flags = O_RDWR, O_NONBLOCK
 _ = __NR_mmap2

@@ -3,6 +3,7 @@
 
 # Description of syscall arguments. See README.md for details.
 
+include <linux/timex.h>
 include <linux/socket.h>
 include <linux/swap.h>
 include <linux/ptrace.h>
@@ -262,7 +263,6 @@ ptrace$setsig(req const[PTRACE_SETSIGINFO], pid pid, ignored intptr, data ptr[in
 ptrace$setopts(req flags[ptrace_req_setopts], pid pid, ignored intptr, flags flags[ptrace_options]) (breaks_returns)
 ptrace$getenv(req const[PTRACE_GETEVENTMSG], pid pid, ignored intptr, data ptr[out, intptr]) (breaks_returns)
 ptrace$cont(req flags[ptrace_req_cont], pid pid, ignored intptr, data intptr) (breaks_returns)
-ptrace$broken(req flags[ptrace_req_cont], pid const[0xdeadbeaf])
 ptrace$PTRACE_SECCOMP_GET_FILTER(req const[PTRACE_SECCOMP_GET_FILTER], pid pid, addr intptr, data ptr[out, array[int8]]) (breaks_returns)
 ptrace$PTRACE_SECCOMP_GET_METADATA(req const[PTRACE_SECCOMP_GET_METADATA], pid pid, addr len[data], data ptr[in, seccomp_metadata]) (breaks_returns)
 
@@ -515,8 +515,6 @@ sched_getattr(pid pid, attr ptr[out, sched_attr], size len[attr], flags const[0]
 sched_setattr(pid pid, attr ptr[in, sched_attr], flags const[0])
 sched_yield()
 getrandom(buf buffer[out], len len[buf], flags flags[getrandom_flags])
-getcpu(cpu ptr[in, int64], node ptr[in, int64])
-umask(mode_t flags [open_mode])
 
 # Getcpu
 getcpu(cpu ptr[in, int64], node ptr[in, int64])
@@ -532,6 +530,10 @@ swapon(file ptr[in, filename] , flags flags[swapflags])
 swapoff(file ptr[in, filename])
 
 swapflags = SWAP_FLAG_PREFER, SWAP_FLAG_DISCARD
+
+# Adjtimex
+adjtimex(tx ptr[in, timex])
+ntp_adjtime(tx ptr[in, timex])
 
 membarrier(cmd flags[membarrier_cmd], flags const[0])
 
@@ -1159,7 +1161,7 @@ siginfo {
 define SIGINFO_SIZE	sizeof(struct siginfo)
 
 timex {
-	stuff0	intptr
+	mode	flags[adjtimex_flags, int32]
 	stuff1	intptr
 	stuff2	intptr
 	stuff3	intptr
@@ -1352,7 +1354,7 @@ ptrace_peeksiginfo_flags = PTRACE_PEEKSIGINFO_SHARED
 close_range_flags = CLOSE_RANGE_UNSHARE
 
 # adjtimex flags.
-_ = STA_PLL, STA_PPSFREQ, STA_PPSTIME, STA_FLL, STA_INS, STA_DEL, STA_UNSYNC, STA_FREQHOLD, STA_PPSSIGNAL, STA_PPSJITTER, STA_PPSWANDER, STA_PPSERROR, STA_CLOCKERR, STA_NANO, STA_MODE, STA_CLK, STA_RONLY
+adjtimex_flags = STA_PLL, STA_PPSFREQ, STA_PPSTIME, STA_FLL, STA_INS, STA_DEL, STA_UNSYNC, STA_FREQHOLD, STA_PPSSIGNAL, STA_PPSJITTER, STA_PPSWANDER, STA_PPSERROR, STA_CLOCKERR, STA_NANO, STA_MODE, STA_CLK, STA_RONLY
 # clock_adjtime modes
 _ = ADJ_OFFSET, ADJ_FREQUENCY, ADJ_MAXERROR, ADJ_ESTERROR, ADJ_STATUS, ADJ_TIMECONST, ADJ_TAI, ADJ_SETOFFSET, ADJ_MICRO, ADJ_NANO, ADJ_TICK, ADJ_OFFSET_SINGLESHOT
 

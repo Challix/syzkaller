@@ -25,7 +25,7 @@ lremovexattr(path ptr[in, filename], name ptr[in, xattr_name])
 fremovexattr(fd fd, name ptr[in, xattr_name])
 
 # domainname descriptions
-getdomainname(name ptr[in, xattr_name], size len[name])
+#getdomainname(name ptr[in, xattr_name], size len[name])
 setdomainname(name ptr[in, xattr_name], size len[name])
 
 xattr_name [
